@@ -21,8 +21,8 @@ IF	[Ii][Ff]
 
 
 C_START	"/"+"*"
-C_SIMPLE	[^*\n]*
-C_COMPLEX "	*"+[^*/\n]*
+C_SIMPLE	[^*]
+C_COMPLEX   "*"+[^/]
 C_END		"*"+"/"
 ML_COMMENT {START}[{SIMPLE}{COMPLEX}]*{END}
 SL_COMMENT \/\/(.*)
