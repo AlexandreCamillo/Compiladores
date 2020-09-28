@@ -1,6 +1,6 @@
 # Primeiro Analisador Léxico
 
-Um arquivo LEX que reconhece os tokens descritos a seguir:
+## Um arquivo LEX que reconhece os tokens descritos a seguir:
 
 ||||
 |--- |--- |--- |
@@ -18,10 +18,24 @@ Um arquivo LEX que reconhece os tokens descritos a seguir:
 |_STRING|"hello, world"   "Aspas internas com \" (contrabarra)""ou com "" (duas aspas)"|Uma string começa e termina com aspas. Se houver aspas dentro da string devemos usar contrabarra ou duas aspas. Uma string não pode ir além do final da linha.|
 ||||
 
+## Identificadores dos Tokens
+Quando um token for identificado, o analisador irá retornar o valor referente ao token baseado no `enum`:
+```c
+enum TOKEN { _ID = 256, _FOR, _IF, _INT, _FLOAT, _MAIG, _MEIG, _IG, _DIF, _STRING, _COMENTARIO };
+```
 
+## Comandos
 
-A compilação será feita com o seguinte comando:
+A compilação pode ser feita com o seguinte comando:
 ```sh
-lex scan.lex
-g++ -Wall -std=c++17 main.cc -lfl -o vpl_execution 
+$ make build
+```
+Arquivos gerados pela compilação podem ser removidos com:
+```sh
+$ make clean
+```
+
+É possível testar o analisador com:
+```sh
+$ ./vpl_execution
 ```
