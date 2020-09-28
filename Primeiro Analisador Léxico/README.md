@@ -4,7 +4,7 @@ Um arquivo LEX que reconhece os tokens descritos a seguir:
 
 ||||
 |--- |--- |--- |
-|Token|Lexemas|Padrão|
+|**Token**|**Lexemas**|**Padrão**|
 |_ID|a b _1 ab1  $tab   _$5|'$', letra ou '_' seguido por letra, dígito, '$' ou '_'|
 |_INT|1 221 0|Números inteiros|
 |_FLOAT|0.1 1.028 1.2E-4  0.2e+3 1e3|Números de ponto flutuante e  em notação científica|
