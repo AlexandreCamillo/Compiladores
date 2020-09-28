@@ -9,21 +9,25 @@ using namespace std;
 
 WS	[ \t\n]*
 
-DIGITO [0-9]
-LETRA [a-zA-Z_$]
-SINAL ("+"|"-")
+DIGITO  [0-9]
+LETRA 	[a-zA-Z_$]
+SINAL 	("+"|"-")
 
-INT {DIGITO}*
-FLOAT {INT}("."{INT})?([Ee]("+"|"-")?{INT})?
+INT 	{DIGITO}*
+FLOAT 	{INT}("."{INT})?([Ee]("+"|"-")?{INT})?
 
-FOR [Ff][Oo][Rr]
-IF [Ii][Ff]
+FOR 	[Ff][Oo][Rr]
+IF 	    [Ii][Ff]
 
+C_START	    "/*"
+C_END		"*/"
+C_SIMPLE	[^*]
+C_COMPLEX	"*"/[^/]
  
 /* O operador . significa a mesma coisa que LINHA */
-LINHA [^\n]* 
+LINHA 	[^\n]* 
 
-ID {LETRA}+({LETRA}|{DIGITO})*
+ID 	    {LETRA}+({LETRA}|{DIGITO})*
 
 %%
     /* Padrões e ações. Nesta seção, comentários devem ter um tab antes */
