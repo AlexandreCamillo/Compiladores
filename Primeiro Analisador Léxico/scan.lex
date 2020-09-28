@@ -22,14 +22,20 @@ IF	[Ii][Ff]
 
 C_START	"/"+"*"
 C_SIMPLE	[^*]
-C_COMPLEX   "*"+[^/]
+C_COMPLEX   	"*"+[^/]
 C_END		"*"+"/"
 ML_COMMENT {START}[{SIMPLE}{COMPLEX}]*{END}
 SL_COMMENT \/\/(.*)
 
+S_START	(\")
+S_SIMPLE	(\\.)
+S_COMPLEX   	([^"\\]|(\"\"))
+S_END		(\")
+
 ID	{LETRA}+({LETRA}|{DIGITO})*
 
 %x C
+%x S
 %%
 
 {WS}	{ /* ignora espaços, tabs e '\n' */ } 
@@ -55,6 +61,11 @@ ID	{LETRA}+({LETRA}|{DIGITO})*
 
 
 {ID} { return _ID; }
+
+{S_START}	{ BEGIN(S); yymore(); }
+<S>{S_SIMPLE}	{ yymore(); }
+<S>{S_COMPLEX}	{ yymore(); }
+<S>{S_END}  	{ BEGIN(0); return _STRING; }
 
 {C_START}	{ BEGIN(C); yymore(); }
 <C>{C_SIMPLE}	{ yymore(); }
