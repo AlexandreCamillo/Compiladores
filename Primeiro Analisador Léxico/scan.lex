@@ -9,28 +9,29 @@ using namespace std;
 
 WS	[ \t\n]*
 
-DIGITO  [0-9]
-LETRA 	[a-zA-Z_$]
-SINAL 	("+"|"-")
+DIGITO	[0-9]
+LETRA	[a-zA-Z_$]
+SINAL	("+"|"-")
 
-INT 	{DIGITO}*
-FLOAT 	{INT}("."{INT})?([Ee]("+"|"-")?{INT})?
+INT	{DIGITO}*
+FLOAT	{INT}("."{INT})?([Ee]("+"|"-")?{INT})?
 
-FOR 	[Ff][Oo][Rr]
-IF 	    [Ii][Ff]
+FOR	[Ff][Oo][Rr]
+IF	[Ii][Ff]
 
-C_START	    "/*"
-C_END		"*/"
-C_SIMPLE	[^*]
-C_COMPLEX	"*"/[^/]
- 
-/* O operador . significa a mesma coisa que LINHA */
-LINHA 	[^\n]* 
 
-ID 	    {LETRA}+({LETRA}|{DIGITO})*
+C_START	"/"+"*"
+C_SIMPLE	[^*\n]*
+C_COMPLEX "	*"+[^*/\n]*
+C_END		"*"+"/"
+ML_COMMENT {START}[{SIMPLE}{COMPLEX}]*{END}
+SL_COMMENT \/\/(.*)
 
+ID	{LETRA}+({LETRA}|{DIGITO})*
+
+%x C
 %%
-    /* Padrões e ações. Nesta seção, comentários devem ter um tab antes */
+
 {WS}	{ /* ignora espaços, tabs e '\n' */ } 
     
 {INT} { return _INT; }
@@ -38,6 +39,7 @@ ID 	    {LETRA}+({LETRA}|{DIGITO})*
 
 {FOR} { return _FOR; }
 {IF} { return _IF; }
+
 
 "+" { return '+'; }
 "-" { return '-'; }
@@ -50,7 +52,16 @@ ID 	    {LETRA}+({LETRA}|{DIGITO})*
 "==" { return _IG; }
 "!=" { return _DIF; }
 
+
+
 {ID} { return _ID; }
+
+{C_START}	{ BEGIN(C); yymore(); }
+<C>{C_SIMPLE}	{ yymore(); }
+<C>{C_COMPLEX}	{ yymore(); }
+<C>{C_END}  	{ BEGIN(0); return _COMENTARIO; }
+
+{SL_COMMENT}	{return _COMENTARIO;}
 
 .       { return *yytext; 
           /* Essa deve ser a última regra. Dessa forma qualquer caractere isolado será retornado pelo seu código ascii. */ }
