@@ -11,7 +11,7 @@ Arquivos gerados pela compilação podem ser removidos com:
 $ make clean
 ```
 
-É possível testar o analisador com:
+É possível testar o tradutor com:
 ```sh
-$ ./vpl_execution
+$ ./tradutor
 ```
