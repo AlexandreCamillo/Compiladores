@@ -7,8 +7,10 @@
 using namespace std;
 
 struct Atributos {
-  string v;
+  vector<string> v;
 };
+
+#define YYSTYPE Atributos
 
 vector<string> comandos;
 map<string,int> vars;
@@ -16,74 +18,105 @@ map<string,int> vars;
 void define_var( string var );
 void checa_declarado( string var );
 
+vector<string> concatena( vector<string> a, vector<string> b );
+vector<string> operator+( vector<string> a, vector<string> b );
+vector<string> operator+( vector<string> a, string b );
+
 string gera_label( string prefixo );
 vector<string> resolve_enderecos( vector<string> entrada );
 
-#define YYSTYPE Atributos
 
-void erro( string msg );
-// void Print( string st );
-
-// protótipo para o analisador léxico (gerado pelo lex)
 int yylex();
 void yyerror( const char* );
+void erro( string msg );
 int retorna( int tk );
+
+void imprime (vector<string> codigo);
 
 int linha = 1, coluna_atual = 1, coluna_anterior = 0;
 
+vector<string> novo;
+
 %}
 
-%token NUM STR ID LET IF ELSE
-    
+%token NUM STR ID LET IF ELSE EQ GT LT NE
+
 %left '+' '-'
 %left '*' '/'
 
 %start S
 
 %%
-S : STMs { for(auto i = 0; i < comandos.size(); i++) cout << comandos[i] << endl; cout << endl << "."; }
+S : STMs {  imprime(resolve_enderecos($1.v)); }
   ;
 
-STMs : STM ';' STMs { $$.v = $1.v + "\n" + $3.v; }
-     |              { $$.v = ""; }
+STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
+     | STM STMs     { $$.v = $1.v + $2.v; }
+     |              { $$.v = novo; }
      ;
 
-STM : A { comandos.push_back($$.v + " ^"); }
-    | LET DECLVARs { $$ = $2; comandos.push_back($$.v);}
+STM : A ';'{ $$.v = $1.v + "^"; }
+    | LET DECLVARs ';'{ $$ = $2; }
+    | SEC_STM
+    | COMP_STM
+    | EXP_STM
     ;
 
-DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + " " + $3.v; }
+COMP_STM  : '{' '}'
+          | '{' STMs '}' { $$.v = $2.v; }
+          ;
+
+SEC_STM : IF '(' R ')' STM { 
+            string end_if =  gera_label("end_if");
+            $$.v = $3.v + "!" + end_if + "?" + $5.v + (":" + end_if);
+          }
+        | IF '(' R ')' STM ELSE STM { 
+            string then =  gera_label("then");
+            string end_if =  gera_label("end_if");
+            $$.v = $3.v + then + "?" + $7.v + end_if + "#" + (":" + then) + $5.v + (":" + end_if);
+          }
+        ;
+
+EXP_STM : ';'
+        | R ';'
+        ;
+
+DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v; }
          | DECLVAR
          ;
 
-DECLVAR : ID '=' E { define_var( $1.v ); $$.v = $1.v + " & " + $1.v + " " + $3.v + " = ^"; }
-        | ID       { define_var( $1.v ); $$.v = $1.v + " &";}
+DECLVAR : ID '=' R { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
+        | ID       { $$.v = $1.v + "&";}
         ;
 
-A : ID '=' A { checa_declarado($1.v); $$.v = $1.v + " " + $3.v + " ="; }
-  | E
+A : ID '=' A { $$.v = $1.v + $3.v + "="; }
+  | R
   ;
 
-// IF_ELSE : IF '(' COND ')' STM {}
-//      | IF '(' COND ')' '{' STMs '}' {}
-
-// COND : 
+R : E '<' E { $$.v = $1.v + $3.v + "<"; }
+  | E '>' E { $$.v = $1.v + $3.v + ">"; }
+  | E EQ E { $$.v = $1.v + $3.v + "=="; }
+  | E NE E { $$.v = $1.v + $3.v + "!="; }
+  | E GT E { $$.v = $1.v + $3.v + ">="; }
+  | E LT E { $$.v = $1.v + $3.v + "<="; }
+  | E
+  ;
   
-E : E '+' T { $$.v = $1.v + " " + $3.v + " +"; }
-  | E '-' T { $$.v = $1.v + " " + $3.v + " -"; }
+E : E '+' T { $$.v = $1.v + $3.v + "+"; }
+  | E '-' T { $$.v = $1.v + $3.v + "-"; }
   | T
 
-T : T '*' F { $$.v = $1.v + " " + $3.v + " *"; }
-  | T '/' F { $$.v = $1.v + " " + $3.v + " /"; }
+T : T '*' F { $$.v = $1.v + $3.v + "*"; }
+  | T '/' F { $$.v = $1.v + $3.v + "/"; }
   | F
   ;
   
-F : ID  { $$.v = $1.v + " @"; }
+F : ID  { $$.v = $1.v + "@"; }
   | NUM { $$.v = $1.v; }
   | STR { $$.v = $1.v; }
   | '(' E ')' { $$ = $2; }
-  | '{' '}' { $$.v = "{}"; }
-  | '[' ']' { $$.v = "[]"; }
+  | '{' '}' { $$.v = novo + "{}"; }
+  | '[' ']' { $$.v = novo + "[]"; }
   // | ID '(' PARAM ')' { $$.v = $1.v + " #"; }
   ;
   
@@ -99,21 +132,25 @@ F : ID  { $$.v = $1.v + " @"; }
 
 #include "lex.yy.c"
 
-// map<int,string> nome_tokens = {
-//   { STR, "string" },
-//   { ID, "nome de identificador" },
-//   { NUM, "número" }
-// };
-// string nome_token( int token ) {
-//   if( nome_tokens.find( token ) != nome_tokens.end() )
-//     return nome_tokens[token];
-//   else {
-//     string r;
-    
-//     r = token;
-//     return r;
-//   }
-// }
+vector<string> concatena( vector<string> a, vector<string> b ) {
+  a.insert( a.end(), b.begin(), b.end() );
+  return a;
+}
+
+vector<string> operator+( vector<string> a, vector<string> b ) {
+  return concatena( a, b );
+}
+
+vector<string> operator+( vector<string> a, string b ) {
+  a.push_back( b );
+  return a;
+}
+
+void imprime (vector<string> codigo){
+  for(auto i = 0; i < codigo.size(); i++) 
+    cout << codigo[i] << endl; 
+  cout << endl << ".";
+}
 
 void define_var( string var ) {
   if (vars.find( var ) != vars.end()){
@@ -153,7 +190,7 @@ vector<string> resolve_enderecos( vector<string> entrada ) {
 }
 
 int retorna( int tk ) {  
-  yylval.v = yytext; 
+  yylval.v = novo + yytext; 
   coluna_atual += strlen( yytext ); 
 
   return tk;

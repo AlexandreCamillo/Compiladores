@@ -19,6 +19,10 @@ STR 	(\"([^\"\n]|(\\\")|\"\")+\")|(\'([^\'\n]|(\\\')|\'\')+\')
 "let"	   { return retorna( LET ); }
 "if"	   { return retorna( IF ); }
 "else"	   { return retorna( ELSE ); }
+"=="	   { return retorna( EQ ); }
+"!="	   { return retorna( NE ); }
+"<="	   { return retorna( GT ); }
+">="	   { return retorna( LT ); }
 
  /* "print"    { return retorna( PRINT ); } */
 
