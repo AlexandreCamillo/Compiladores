@@ -1,9 +1,4 @@
-let a = "ABA", c = 'CATE', resultado;
-if( a == c )
-  resultado = "Ta' errado!";
-else if( a < c ) {
-  resultado = "a vem antes de c: ";
-  resultado = resultado + a + '<' + c;
+let i = 0, j = 1, x = 10, b = [];
+while( i < x ) {
+  i = i + 1;
 }
-else
-  resultado = "Deu ruim!";

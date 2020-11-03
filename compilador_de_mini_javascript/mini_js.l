@@ -1,6 +1,6 @@
 DIGITO  [0-9]
 LETRA   [A-Za-z_]
-DOUBLE  {DIGITO}+("."{DIGITO}+)?
+DOUBLE  [-]?{DIGITO}+("."{DIGITO}+)?
 ID      {LETRA}({LETRA}|{DIGITO})*
 STR 	(\"([^\"\n]|(\\\")|\"\")+\")|(\'([^\'\n]|(\\\')|\'\')+\')
 
@@ -19,7 +19,10 @@ STR 	(\"([^\"\n]|(\\\")|\"\")+\")|(\'([^\'\n]|(\\\')|\'\')+\')
 "let"	   { return retorna( LET ); }
 "if"	   { return retorna( IF ); }
 "else"	   { return retorna( ELSE ); }
+"while"	   { return retorna( WHILE ); }
+"for"	   { return retorna( FOR ); }
 "=="	   { return retorna( EQ ); }
+"- "	   { return retorna( MN ); }
 "!="	   { return retorna( NE ); }
 "<="	   { return retorna( GT ); }
 ">="	   { return retorna( LT ); }

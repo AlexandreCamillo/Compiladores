@@ -39,7 +39,7 @@ vector<string> novo;
 
 %}
 
-%token NUM STR ID LET IF ELSE EQ GT LT NE
+%token NUM STR ID LET IF ELSE WHILE FOR EQ GT LT NE MN
 
 %left '+' '-'
 %left '*' '/'
@@ -56,10 +56,11 @@ STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
      ;
 
 STM : A ';'{ $$.v = $1.v + "^"; }
-    | LET DECLVARs ';'{ $$ = $2; }
-    | SEC_STM
+    | DECLVARs_LINE
     | COMP_STM
     | EXP_STM
+    | SEC_STM
+    | ITR_STM
     ;
 
 COMP_STM  : '{' '}'
@@ -80,6 +81,20 @@ SEC_STM : IF '(' R ')' STM {
 EXP_STM : ';'
         | R ';'
         ;
+
+ITR_STM : WHILE '(' R ')' STM { 
+            string end_wh =  gera_label("end_wh");
+            string s_wh =  gera_label("s_wh");
+            $$.v = novo + (":" + s_wh) + $3.v + "!" + end_wh + "?" + $5.v + s_wh + "#" + (":" + end_wh);
+          }
+        | FOR '(' LET DECLVAR ';' EXP_STM A ')' STM {
+            string end_for =  gera_label("end_for");
+            string s_for =  gera_label("s_for");
+            $$.v = $4.v + (":" + s_for) + $6.v + "!" + end_for + "?" + $9.v + $7.v + "^" + s_for + "#" + (":" + end_for);
+          }
+        ;
+
+DECLVARs_LINE : LET DECLVARs ';'{ $$ = $2; }
 
 DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v; }
          | DECLVAR
@@ -103,7 +118,7 @@ R : E '<' E { $$.v = $1.v + $3.v + "<"; }
   ;
   
 E : E '+' T { $$.v = $1.v + $3.v + "+"; }
-  | E '-' T { $$.v = $1.v + $3.v + "-"; }
+  | E MN T { $$.v = $1.v + $3.v + "-"; }
   | T
 
 T : T '*' F { $$.v = $1.v + $3.v + "*"; }
