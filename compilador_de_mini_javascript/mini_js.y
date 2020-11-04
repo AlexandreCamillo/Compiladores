@@ -37,12 +37,19 @@ int linha = 1, coluna_atual = 1, coluna_anterior = 0;
 
 vector<string> novo;
 
+string eqq = "=";
+
+void c (string m) {
+  cout << m << endl;
+}
+
 %}
 
 %token NUM STR ID LET IF ELSE WHILE FOR EQ GT LT NE MN
 
 %left '+' '-'
 %left '*' '/'
+
 
 %start S
 
@@ -55,8 +62,8 @@ STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
      |              { $$.v = novo; }
      ;
 
-STM : A ';'{ $$.v = $1.v + "^"; }
-    | DECLVARs_LINE
+STM : A { $$.v = $1.v + "^"; }
+    | LET DECLVARs { $$ = $2; }
     | COMP_STM
     | EXP_STM
     | SEC_STM
@@ -94,8 +101,6 @@ ITR_STM : WHILE '(' R ')' STM {
           }
         ;
 
-DECLVARs_LINE : LET DECLVARs ';'{ $$ = $2; }
-
 DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v; }
          | DECLVAR
          ;
@@ -104,9 +109,27 @@ DECLVAR : ID '=' R { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
         | ID       { $$.v = $1.v + "&";}
         ;
 
-A : ID '=' A { $$.v = $1.v + $3.v + "="; }
+A : LVALUEPROP A { $$.v = $1.v + $2.v + eqq; eqq = "="; }
   | R
+  | ',' A { $$.v = $2.v; }
   ;
+
+RVALUEPROP : ID RVALUEPROP         { $$.v = $1.v + "@" + $2.v; } 
+           | '.' ID RVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
+           | '[' E ']' RVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }  
+           | ID         { $$.v = $1.v + "@"; } 
+           | '.' ID     { $$.v = $2.v + "[@]"; } 
+           | '[' E ']'  { $$.v = $2.v + "[@]"; } 
+           ;
+
+
+LVALUEPROP : ID LVALUEPROP         { $$.v = $1.v + "@" + $2.v; } 
+           | ID '='                { $$.v = $1.v; } 
+           | '.' ID '='            { $$.v = $2.v; eqq = "[=]";} 
+           | '[' E ']' '='         { $$.v = $2.v; eqq = "[=]";} 
+           | '.' ID LVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
+           | '[' E ']' LVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }                 
+           ;
 
 R : E '<' E { $$.v = $1.v + $3.v + "<"; }
   | E '>' E { $$.v = $1.v + $3.v + ">"; }
@@ -117,8 +140,8 @@ R : E '<' E { $$.v = $1.v + $3.v + "<"; }
   | E
   ;
   
-E : E '+' T { $$.v = $1.v + $3.v + "+"; }
-  | E MN T { $$.v = $1.v + $3.v + "-"; }
+E : E MN T { $$.v = $1.v + $3.v + "-"; }
+  | E '+' T { $$.v = $1.v + $3.v + "+"; }
   | T
 
 T : T '*' F { $$.v = $1.v + $3.v + "*"; }
@@ -126,8 +149,9 @@ T : T '*' F { $$.v = $1.v + $3.v + "*"; }
   | F
   ;
   
-F : ID  { $$.v = $1.v + "@"; }
+F : RVALUEPROP { $$.v = $1.v; }
   | NUM { $$.v = $1.v; }
+  | '-'NUM { $$.v = novo + "0" + $2.v + "-"; }
   | STR { $$.v = $1.v; }
   | '(' E ')' { $$ = $2; }
   | '{' '}' { $$.v = novo + "{}"; }

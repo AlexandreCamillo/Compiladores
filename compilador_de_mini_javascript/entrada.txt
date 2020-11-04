@@ -1,4 +1,7 @@
-let i = 0, j = 1, x = 10, b = [];
-while( i < x ) {
-  i = i + 1;
-}
+let obj = {}, i = -2;
+obj.nome = "Manoel";
+obj.nums = [];
+obj.nums[0] = 12;
+obj.nums[3] = 13;
+obj.nums[i+3] = 45 - 1;
+obj['nom' + 'e'] = obj.nome + "!";
