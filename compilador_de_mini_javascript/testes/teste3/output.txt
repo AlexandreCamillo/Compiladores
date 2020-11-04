@@ -1,0 +1,4 @@
+=== Console ===
+=== Vars ===
+|{ a: 4; b: 5; c: undefined; d: a e' menor; }|
+=== Pilha ===

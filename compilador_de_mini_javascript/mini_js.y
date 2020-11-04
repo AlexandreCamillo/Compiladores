@@ -45,7 +45,7 @@ void c (string m) {
 
 %}
 
-%token NUM STR ID LET IF ELSE WHILE FOR EQ GT LT NE MN
+%token NUM STR ID LET IF ELSE WHILE FOR EQ GTE LTE GT LT NE MN
 
 %left '+' '-'
 %left '*' '/'
@@ -62,7 +62,7 @@ STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
      |              { $$.v = novo; }
      ;
 
-STM : A { $$.v = $1.v + "^"; }
+STM : A ';' { $$.v = $1.v + "^"; }
     | LET DECLVARs { $$ = $2; }
     | COMP_STM
     | EXP_STM
@@ -99,44 +99,49 @@ ITR_STM : WHILE '(' R ')' STM {
             string s_for =  gera_label("s_for");
             $$.v = $4.v + (":" + s_for) + $6.v + "!" + end_for + "?" + $9.v + $7.v + "^" + s_for + "#" + (":" + end_for);
           }
+        | FOR '(' A ';' EXP_STM A ')' STM {
+            string end_for =  gera_label("end_for");
+            string s_for =  gera_label("s_for");
+            $$.v = $3.v + "^" + (":" + s_for) + $5.v + "!" + end_for + "?" + $8.v + $6.v + "^" + s_for + "#" + (":" + end_for);
+          }
         ;
 
-DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v; }
-         | DECLVAR
+DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v;}
+         | DECLVAR 
          ;
 
-DECLVAR : ID '=' R { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^"; }
-        | ID       { $$.v = $1.v + "&";}
+DECLVAR : ID '=' R { $$.v = $1.v + "&" + $1.v + $3.v + "=" + "^";  define_var($1.v[0]);}
+        | ID       { $$.v = $1.v + "&"; define_var($1.v[0]);}
         ;
 
-A : LVALUEPROP A { $$.v = $1.v + $2.v + eqq; eqq = "="; }
-  | R
-  | ',' A { $$.v = $2.v; }
+A : LVALUEPROP A { $$.v = $1.v + $2.v + eqq; checa_declarado($1.v[0]); }
+  | R { $$.v = $1.v; } 
+  | ',' A { $$.v = $2.v; checa_declarado($2.v[0]); }
   ;
 
 RVALUEPROP : ID RVALUEPROP         { $$.v = $1.v + "@" + $2.v; } 
            | '.' ID RVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
-           | '[' E ']' RVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }  
+           | '[' A ']' RVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }  
            | ID         { $$.v = $1.v + "@"; } 
            | '.' ID     { $$.v = $2.v + "[@]"; } 
-           | '[' E ']'  { $$.v = $2.v + "[@]"; } 
+           | '[' A ']'  { $$.v = $2.v + "[@]"; } 
            ;
 
 
 LVALUEPROP : ID LVALUEPROP         { $$.v = $1.v + "@" + $2.v; } 
-           | ID '='                { $$.v = $1.v; } 
+           | ID '='                { $$.v = $1.v; eqq = "=";} 
            | '.' ID '='            { $$.v = $2.v; eqq = "[=]";} 
-           | '[' E ']' '='         { $$.v = $2.v; eqq = "[=]";} 
+           | '[' A ']' '='         { $$.v = $2.v; eqq = "[=]";} 
            | '.' ID LVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
-           | '[' E ']' LVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }                 
+           | '[' A ']' LVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }                 
            ;
 
-R : E '<' E { $$.v = $1.v + $3.v + "<"; }
-  | E '>' E { $$.v = $1.v + $3.v + ">"; }
+R : E GT E { $$.v = $1.v + $3.v + "<"; }
+  | E LT E { $$.v = $1.v + $3.v + ">"; }
   | E EQ E { $$.v = $1.v + $3.v + "=="; }
   | E NE E { $$.v = $1.v + $3.v + "!="; }
-  | E GT E { $$.v = $1.v + $3.v + ">="; }
-  | E LT E { $$.v = $1.v + $3.v + "<="; }
+  | E GTE E { $$.v = $1.v + $3.v + ">="; }
+  | E LTE E { $$.v = $1.v + $3.v + "<="; }
   | E
   ;
   
@@ -194,14 +199,14 @@ void imprime (vector<string> codigo){
 void define_var( string var ) {
   if (vars.find( var ) != vars.end()){
     int var_ln = vars.find( var )->second;
-    string msg = "a variável '" + var + "' já foi declarada na linha " + to_string(var_ln);
+    string msg = "a variável '" + var + "' já foi declarada na linha " + to_string(var_ln) + ".";
     erro(msg);
   }
   vars[var] = linha;
 }
 void checa_declarado( string var ) {
   if (vars.find( var ) == vars.end()){
-    string msg = "a variável '" + var + "' não foi declarada ";
+    string msg = "a variável '" + var + "' não foi declarada.";
     erro(msg);
   }
   vars[var] = linha;
@@ -240,8 +245,7 @@ void yyerror( const char* msg )  {
 }
 
 void erro( string msg ) {
-  cout << "Erro: " << msg << " Próximo a: " << yytext << endl << 
-      "Linha: " << linha << ", coluna: " << coluna_anterior << endl;
+  cout << "Erro: " << msg << endl;
   exit( 1 );
 }
 

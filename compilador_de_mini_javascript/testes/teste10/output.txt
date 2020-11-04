@@ -1,0 +1,5 @@
+Erro: a variável 'a' já foi declarada na linha 1.
+=== Console ===
+=== Vars ===
+|{ }|
+=== Pilha ===

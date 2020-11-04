@@ -24,8 +24,10 @@ STR 	(\"([^\"\n]|(\\\")|\"\")+\")|(\'([^\'\n]|(\\\')|\'\')+\')
 "=="	   { return retorna( EQ ); }
 "- "	   { return retorna( MN ); }
 "!="	   { return retorna( NE ); }
-"<="	   { return retorna( GT ); }
-">="	   { return retorna( LT ); }
+"<="	   { return retorna( GTE ); }
+">="	   { return retorna( LTE ); }
+"<"	   { return retorna( GT ); }
+">"	   { return retorna( LT ); }
 
  /* "print"    { return retorna( PRINT ); } */
 
