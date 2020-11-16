@@ -1,4 +1,4 @@
 === Console ===
 === Vars ===
-|{ a: [ ]; f: [ ]; g: { &funcao: ##; }; }|
+|{ a: [ ]; f: [ ]; g: { &funcao: 25; }; }|
 === Pilha ===

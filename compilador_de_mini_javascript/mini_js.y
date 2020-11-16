@@ -238,11 +238,11 @@ F : RVALUEPROP { $$.v = $1.v; }
   | ID '(' ')' { $$.v = novo + to_string(arg_count) + $1.v + "@" + "$"; }
   ;
   
-ARGs : E ',' ARGs { 
+ARGs : A ',' ARGs { 
        arg_count++;
        $$.v = $1.v + $3.v;   
      }
-     | E { 
+     | R { 
        arg_count = 1;
        $$.v = $1.v;  
      }
@@ -287,11 +287,11 @@ void define_var( string var ) {
   vars[var] = linha;
 }
 void checa_declarado( string var ) {
-  if (vars.find( var ) == vars.end()){
+  /* if (vars.find( var ) == vars.end()){
     string msg = "a variável '" + var + "' não foi declarada.";
     erro(msg);
   }
-  vars[var] = linha;
+  vars[var] = linha; */
 }
 
 string gera_label( string prefixo ) {
