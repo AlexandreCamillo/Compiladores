@@ -116,6 +116,7 @@ STM : A ';' { $$.v = $1.v + "^"; }
     | E ASM ';' {
       $$.v = $1.v + tokeniza($2.v[0]) + "^"; 
     }
+    | RVALUEPROP '(' ARGs ')' { $$.v = $3.v + to_string(arg_count) + $1.v + "$" + "^"; }     
     ;
 
 COMP_STM  : '{' STMs '}' { $$.v = $2.v; }
@@ -203,7 +204,7 @@ LVALUEPROP : ID LVALUEPROP         { $$.v = $1.v + "@" + $2.v; }
            | '.' ID '='            { $$.v = $2.v; eqq = "[=]";} 
            | '[' A ']' '='         { $$.v = $2.v; eqq = "[=]";} 
            | '.' ID LVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
-           | '[' A ']' LVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }                 
+           | '[' A ']' LVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }   
            ;
 
 R : E GT E { $$.v = $1.v + $3.v + "<"; }
