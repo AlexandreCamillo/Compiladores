@@ -3,6 +3,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <string.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -32,6 +34,29 @@ vector<string> resolve_enderecos( vector<string> entrada );
 vector<string> resolve_arg_idx( vector<string> entrada );
 
 
+vector<string> tokeniza(string str){
+    string sep = " ";
+    char* cstr=const_cast<char*>(str.c_str());
+    char* current;
+    vector<string> arr;
+    current=strtok(cstr,sep.c_str());
+    while(current!=NULL){
+        arr.push_back(current);
+        current=strtok(NULL,sep.c_str());
+    }
+    return arr;
+}
+
+string convertToString(char* a, int size){ 
+    int i; 
+    string s = ""; 
+    for (i = 0; i < size; i++) { 
+        s = s + a[i]; 
+    } 
+    return s; 
+} 
+
+
 
 int yylex();
 void yyerror( const char* );
@@ -56,7 +81,7 @@ void c (string m) {
 
 %}
 
-%token NUM STR ID LET FUNC RETURN IF ELSE WHILE FOR EQ GTE LTE GT LT NE MN
+%token NUM STR ID LET FUNC RETURN IF ELSE WHILE FOR EQ GTE LTE GT LT NE MN ASM
 
 %right '='
 %nonassoc '<' '>' GTE LTE LT GT
@@ -87,6 +112,9 @@ STM : A ';' { $$.v = $1.v + "^"; }
     }
     | RETURN ID ';' { 
       $$.v = $2.v + "@" + "\'&retorno\'" + "@" + "~";
+    }
+    | E ASM ';' {
+      $$.v = $1.v + tokeniza($2.v[0]) + "^"; 
     }
     ;
 
@@ -162,7 +190,7 @@ A : LVALUEPROP A { $$.v = $1.v + $2.v + eqq; checa_declarado($1.v[0]); }
   ;
 
 RVALUEPROP : ID RVALUEPROP         { $$.v = $1.v + "@" + $2.v; } 
-           | '.' ID RVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; } 
+           | '.' ID RVALUEPROP     { $$.v = $2.v + "[@]" + $3.v; }
            | '[' A ']' RVALUEPROP  { $$.v = $2.v + "[@]" + $4.v; }  
            | ID         { $$.v = $1.v + "@"; } 
            | '.' ID     { $$.v = $2.v + "[@]"; } 
@@ -198,6 +226,7 @@ T : T '*' F { $$.v = $1.v + $3.v + "*"; }
   ;
   
 F : RVALUEPROP { $$.v = $1.v; }
+  | RVALUEPROP '(' ARGs ')' { $$.v = $3.v + to_string(arg_count) + $1.v + "$"; }
   | NUM { $$.v = $1.v; }
   | '-'NUM { $$.v = novo + "0" + $2.v + "-"; }
   | STR { $$.v = $1.v; }
@@ -241,6 +270,7 @@ void imprime (vector<string> codigo){
   for(auto i = 0; i < codigo.size(); i++) 
     cout << codigo[i] << endl; 
 }
+
 
 void define_func(string id, vector<string> f ) {
   define_var( id );

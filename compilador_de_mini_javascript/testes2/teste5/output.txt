@@ -1,5 +1,5 @@
 === Console ===
 Hello, world!
 === Vars ===
-|{ log: { &funcao: ##; }; r: undefined; }|
+|{ log: { &funcao: 20; }; r: undefined; }|
 === Pilha ===
