@@ -1,5 +1,5 @@
 === Console ===
 Saida: 3.14
 === Vars ===
-|{ Number: { toString: { &funcao: ##; }; }; a: Saida: ; b: 3.14; console: { log: { &funcao: ##; }; }; log: { &funcao: ##; }; number_to_string: { &funcao: ##; }; }|
+|{ Number: { toString: { &funcao: 95; }; }; a: Saida: ; b: 3.14; console: { log: { &funcao: 75; }; }; log: { &funcao: 75; }; number_to_string: { &funcao: 95; }; }|
 === Pilha ===
