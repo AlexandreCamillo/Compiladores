@@ -1,0 +1,4 @@
+=== Console ===
+=== Vars ===
+|{ dois: 4; teste: { &funcao: 32; }; um: undefined; }|
+=== Pilha ===

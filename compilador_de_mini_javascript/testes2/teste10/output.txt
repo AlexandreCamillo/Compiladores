@@ -1,0 +1,8 @@
+=== Console ===
+Joao
+Classe Aluno
+Maria
+Classe Aluno
+=== Vars ===
+|{ criaAluno: { &funcao: ##; }; getClass: { &funcao: ##; }; getNome: { &funcao: ##; }; invoke: { &funcao: ##; }; joao: { celular: 123456; email: eu@aqui.com; getClass: undefined; getNome: { &funcao: ##; }; nome: Joao; super: { class: Classe Aluno; getClass: { &funcao: ##; }; }; }; log: { &funcao: ##; }; maria: { celular: 123457; email: voce@la.com; getClass: undefined; getNome: { &funcao: ##; }; nome: Maria; super: { class: Classe Aluno; getClass: { &funcao: ##; }; }; }; prototipoAluno: { class: Classe Aluno; getClass: { &funcao: ##; }; }; toString: { &funcao: ##; }; }|
+=== Pilha ===

@@ -1,0 +1,4 @@
+=== Console ===
+=== Vars ===
+|{ f: { &funcao: 20; }; res: { arr: [ 0: undefined; 1: 0; ]; num: 55; }; }|
+=== Pilha ===
