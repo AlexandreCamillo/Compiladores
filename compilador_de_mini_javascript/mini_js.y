@@ -103,7 +103,6 @@ STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
 STM : A ';' { $$.v = $1.v + "^"; }
     | LET DECLVARs { $$ = $2; }
     | COMP_STM
-    | EXP_STM
     | SEC_STM
     | ITR_STM
     | FUNCDEF
@@ -116,7 +115,6 @@ STM : A ';' { $$.v = $1.v + "^"; }
     | E ASM ';' {
       $$.v = $1.v + tokeniza($2.v[0]) + "^"; 
     }
-    | RVALUEPROP '(' ARGs ')' { $$.v = $3.v + to_string(arg_count) + $1.v + "$" + "^"; }     
     ;
 
 COMP_STM  : '{' STMs '}' { $$.v = $2.v; }

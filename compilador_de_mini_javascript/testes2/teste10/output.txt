@@ -4,5 +4,5 @@ Classe Aluno
 Maria
 Classe Aluno
 === Vars ===
-|{ criaAluno: { &funcao: ##; }; getClass: { &funcao: ##; }; getNome: { &funcao: ##; }; invoke: { &funcao: ##; }; joao: { celular: 123456; email: eu@aqui.com; getClass: undefined; getNome: { &funcao: ##; }; nome: Joao; super: { class: Classe Aluno; getClass: { &funcao: ##; }; }; }; log: { &funcao: ##; }; maria: { celular: 123457; email: voce@la.com; getClass: undefined; getNome: { &funcao: ##; }; nome: Maria; super: { class: Classe Aluno; getClass: { &funcao: ##; }; }; }; prototipoAluno: { class: Classe Aluno; getClass: { &funcao: ##; }; }; toString: { &funcao: ##; }; }|
+|{ criaAluno: { &funcao: 188; }; getClass: { &funcao: 167; }; getNome: { &funcao: 146; }; invoke: { &funcao: 286; }; joao: { celular: 123456; email: eu@aqui.com; getClass: undefined; getNome: { &funcao: 146; }; nome: Joao; super: { class: Classe Aluno; getClass: { &funcao: 167; }; }; }; log: { &funcao: 266; }; maria: { celular: 123457; email: voce@la.com; getClass: undefined; getNome: { &funcao: 146; }; nome: Maria; super: { class: Classe Aluno; getClass: { &funcao: 167; }; }; }; prototipoAluno: { class: Classe Aluno; getClass: { &funcao: 167; }; }; toString: { &funcao: 352; }; }|
 === Pilha ===
