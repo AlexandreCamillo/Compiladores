@@ -12,11 +12,15 @@ struct Atributos {
 
 #define YYSTYPE Atributos
 
+int params_count = 0;
+int arg_count = 0;
+vector<string> funcoes;
 vector<string> comandos;
 map<string,int> vars;
 
 void define_var( string var );
 void checa_declarado( string var );
+void define_func(string id, vector<string> f );
 
 vector<string> concatena( vector<string> a, vector<string> b );
 vector<string> operator+( vector<string> a, vector<string> b );
@@ -25,6 +29,9 @@ vector<string> operator+( vector<string> a, string b );
 string gera_label( string prefixo );
 vector<string> resolve_enderecos( vector<string> entrada );
 
+vector<string> resolve_arg_idx( vector<string> entrada );
+
+
 
 int yylex();
 void yyerror( const char* );
@@ -32,6 +39,10 @@ void erro( string msg );
 int retorna( int tk );
 
 void imprime (vector<string> codigo);
+
+vector<string> tokeniza (string lexema);
+// Quebra uma string de instruções do cod de pilha em um vetor de strings contendo os tokens entre espaços em branco 
+// e os espaçoes em branco
 
 int linha = 1, coluna_atual = 1, coluna_anterior = 0;
 
@@ -45,8 +56,10 @@ void c (string m) {
 
 %}
 
-%token NUM STR ID LET IF ELSE WHILE FOR EQ GTE LTE GT LT NE MN
+%token NUM STR ID LET FUNC RETURN IF ELSE WHILE FOR EQ GTE LTE GT LT NE MN
 
+%right '='
+%nonassoc '<' '>' GTE LTE LT GT
 %left '+' '-'
 %left '*' '/'
 
@@ -54,7 +67,7 @@ void c (string m) {
 %start S
 
 %%
-S : STMs {  imprime(resolve_enderecos($1.v)); }
+S : STMs {  $$.v = $1.v + "." + funcoes; imprime(resolve_enderecos($$.v)); }
   ;
 
 STMs : STM ';' STMs { $$.v = $1.v + $3.v; }
@@ -68,10 +81,16 @@ STM : A ';' { $$.v = $1.v + "^"; }
     | EXP_STM
     | SEC_STM
     | ITR_STM
+    | FUNCDEF
+    | RETURN E ';' { 
+      $$.v = $2.v + "\'&retorno\'" + "@" + "~";
+    }
+    | RETURN ID ';' { 
+      $$.v = $2.v + "@" + "\'&retorno\'" + "@" + "~";
+    }
     ;
 
-COMP_STM  : '{' '}'
-          | '{' STMs '}' { $$.v = $2.v; }
+COMP_STM  : '{' STMs '}' { $$.v = $2.v; }
           ;
 
 SEC_STM : IF '(' R ')' STM { 
@@ -105,6 +124,29 @@ ITR_STM : WHILE '(' R ')' STM {
             $$.v = $3.v + "^" + (":" + s_for) + $5.v + "!" + end_for + "?" + $8.v + $6.v + "^" + s_for + "#" + (":" + end_for);
           }
         ;
+
+FUNCDEF : FUNC ID '(' PARAMs ')' FUNCBLOCK { 
+  string label = gera_label("func_" + $2.v[0]);
+  $$.v = $2.v + "&" + $2.v + "{}" + "=" + "'&funcao'" + label + "[=]" + "^";
+  params_count = 0;
+  vector<string> funcao;
+  funcao = funcao + (":" + label) + resolve_arg_idx($4.v) + $6.v;
+  define_func($2.v[0], funcao);
+}
+
+FUNCBLOCK : '{' STMs '}' { 
+            $$.v = $2.v + "undefined" + "@" + "\'&retorno\'" + "@" + "~";
+          }
+          ;
+
+PARAMs : ID ',' PARAMs { 
+          $$.v = $1.v + "&" + $1.v + "arguments" + "@" + "|idx|" + "[@]" + "=" + "^" + $3.v; 
+       }
+       | ID {
+          $$.v = $1.v + "&" + $1.v + "arguments" + "@" + "|idx|" + "[@]" + "=" + "^";
+       }
+       |
+       ;
 
 DECLVARs : DECLVAR ',' DECLVARs { $$.v = $1.v + $3.v;}
          | DECLVAR 
@@ -151,6 +193,7 @@ E : E MN T { $$.v = $1.v + $3.v + "-"; }
 
 T : T '*' F { $$.v = $1.v + $3.v + "*"; }
   | T '/' F { $$.v = $1.v + $3.v + "/"; }
+  | T '%' F { $$.v = $1.v + $3.v + "%"; }
   | F
   ;
   
@@ -161,17 +204,21 @@ F : RVALUEPROP { $$.v = $1.v; }
   | '(' E ')' { $$ = $2; }
   | '{' '}' { $$.v = novo + "{}"; }
   | '[' ']' { $$.v = novo + "[]"; }
-  // | ID '(' PARAM ')' { $$.v = $1.v + " #"; }
+  | ID '(' ARGs ')' { $$.v = $3.v + to_string(arg_count) + $1.v + "@" + "$"; }
+  | ID '(' ')' { $$.v = novo + to_string(arg_count) + $1.v + "@" + "$"; }
   ;
   
-// PARAM : ARGs
-//       |
-//       ;
-  
-// ARGs : E ',' ARGs
-//      | E
-//      ;
-  
+ARGs : E ',' ARGs { 
+       arg_count++;
+       $$.v = $1.v + $3.v;   
+     }
+     | E { 
+       arg_count = 1;
+       $$.v = $1.v;  
+     }
+     ;
+
+
 %%
 
 #include "lex.yy.c"
@@ -193,7 +240,11 @@ vector<string> operator+( vector<string> a, string b ) {
 void imprime (vector<string> codigo){
   for(auto i = 0; i < codigo.size(); i++) 
     cout << codigo[i] << endl; 
-  cout << endl << ".";
+}
+
+void define_func(string id, vector<string> f ) {
+  define_var( id );
+  funcoes = funcoes + f;
 }
 
 void define_var( string var ) {
@@ -229,6 +280,19 @@ vector<string> resolve_enderecos( vector<string> entrada ) {
   for( int i = 0; i < saida.size(); i++ ) 
     if( label.count( saida[i] ) > 0 )
         saida[i] = to_string(label[saida[i]]);
+    
+  return saida;
+}
+
+vector<string> resolve_arg_idx( vector<string> entrada ) {
+  vector<string> saida;
+  int count = 0;
+  for( int i = 0; i < entrada.size(); i++ ) 
+    if( entrada[i] == "|idx|" ){ 
+      saida.push_back(to_string(count));
+      count++;
+    } else
+      saida.push_back(entrada[i]);
     
   return saida;
 }
