@@ -17,6 +17,8 @@ STR 	(\"([^\"\n]|(\\\")|\"\")+\")|(\'([^\'\n]|(\\\')|\'\')+\')
 {STR}	   { return retorna( STR ); }
 
 "let"	   { return retorna( LET ); }
+"function"	   { return retorna( FUNC ); }
+"return"	   { return retorna( RETURN ); }
 "if"	   { return retorna( IF ); }
 "else"	   { return retorna( ELSE ); }
 "while"	   { return retorna( WHILE ); }

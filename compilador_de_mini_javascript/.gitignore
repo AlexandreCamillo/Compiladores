@@ -34,8 +34,12 @@
 *.yy.c
 
 mdp
+mdp2
+
 
 mini_js
 y.tab.c
 failed_tests.txt
 interpretador
+interpretadorLegacy
+entrada.txt
